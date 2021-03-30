@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="users">
+
+
+
+<select id="selectUserList" parameterType="hashmap" resultType="hashmap">
+
+		select
+			IDX, user_id, user_pwd, user_name, hit_cnt
+		from
+			users
+		where
+			del_yn = 'N'
+		limit ${firstIndex}, ${lastIndex}
+	
+</select>
+
+<select id="selectListTotCnt" parameterType="hashmap" resultType="int">
+
+	select
+		count(*)
+	from
+		users
+	where
+		del_yn = 'N'
+
+</select>
+
+
+<insert id="insertUser" parameterType="hashmap">
+
+	<selectKey resultType="string" keyProperty="IDX" order="AFTER">
+        SELECT LAST_INSERT_ID() 
+    </selectKey> 
+
+	insert into users
+	(
+		user_id
+	   ,user_pwd
+	   ,user_name
+	   ,del_yn
+	   ,hit_cnt
+	   ,IDX
+	)
+	values
+	(
+		 #{userId}
+		,#{userPwd}
+		,#{userName}
+		,'N'
+		,0
+		,(SELECT IDX_NO FROM (SELECT IFNULL(MAX(IDX), 0)+1 AS IDX_NO FROM USERS) AS IDX_NO)
+	)
+	
+</insert>
+
+<update id="updateHitCnt" parameterType="hashmap" >
+	update users
+	set
+		hit_cnt = IFNULL(hit_cnt,0) +1
+	where
+		IDX = #{IDX}
+</update>
+
+
+<select id="selectUserDetail" parameterType="hashmap" resultType="hashmap" >
+	select
+	    IDX
+	   ,user_id
+	   ,user_name
+	   ,del_yn
+	   ,hit_cnt
+	from
+		users
+	where
+		IDX = #{IDX}
+</select>
+
+<update id="updateUser" parameterType="hashmap">
+	update users
+	set
+		 user_id = #{userId}
+		,user_name = #{userName}
+	where
+		IDX = #{IDX}
+</update>
+
+
+<update id="deleteUser" parameterType="hashmap">
+	update users
+	set
+		del_yn = 'Y'
+	where
+		IDX = #{IDX}
+</update>
+
+
+
+
+</mapper>
